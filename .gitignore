@@ -41,6 +41,11 @@ build/Release
 node_modules/
 jspm_packages/
 
+/node_modules
+npm-debug.log
+.DS_Store
+/*.env
+
 # TypeScript v1 declaration files
 typings/
 
@@ -105,3 +110,4 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
