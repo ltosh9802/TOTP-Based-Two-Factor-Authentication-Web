@@ -1,0 +1,14 @@
+<%- include('partials/header') %>
+
+<div class="jumbotron">
+    <h1 class="display-3">Scan QR (key)</h1>
+    <hr class="my-2">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?data=<%=qrkey%>&ampsize=100x100" alt="">
+    <form action="/qrsuccess" method="post">
+        <button type="submit" name="" id="" class="btn btn-primary btn" btn-lg btn-block">Got it!</button>
+        
+    </form>
+</div>
+
+
+<%- include('partials/footer') %>
