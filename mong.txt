@@ -1,0 +1,8 @@
+
+mongoose.connect(
+  "mongodb+srv://toshik:toshik123@totpcluster-r77o1.mongodb.net/userDB",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+);

@@ -6,6 +6,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
 
@@ -17,19 +18,19 @@ app.use(
   })
 );
 
-mongoose.connect(
-  "mongodb+srv://toshik:toshik123@totpcluster-r77o1.mongodb.net/userDB",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-);
 
-const userSchema = {
+mongoose.connect("mongodb://localhost:27017/userDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   key: String
-};
+});
+const secret = process.env.SECRET;
+userSchema.plugin(encrypt, { secret: secret , encryptedFields:["password","key"], additionalAuthenticatedFields:["email"]});
 
 const User = new mongoose.model("User", userSchema);
 
@@ -45,7 +46,7 @@ app.get("/login", function(req, res) {
   res.render("login", { error: "" });
 });
 app.get("/register", function(req, res) {
-  res.render("register");
+  res.render("register", { error: "" });
 });
 
 app.get("/logout", function(req, res) {
@@ -66,25 +67,37 @@ app.get("/failed", function(req, res) {
 app.post("/register", function(req, res) {
   // var timestamp = Math.floor(Date.now() / 1000);
   // var pwdkey = "loginkey" + timestamp;
-  var pwdkey = authenticator.generateSecret();
-  console.log(pwdkey);
-  // const secretk = pwdkey;
-  const token = authenticator.generate(pwdkey);
-  console.log(token);
- 
-  const newUser = new User({
-    email: req.body.username,
-    password: req.body.password,
-    key: pwdkey
+
+  User.findOne({ email: req.body.username}, function(err, foundUser) {
+    if (!foundUser) {
+      var pwdkey = authenticator.generateSecret();
+      console.log(pwdkey);
+      // const secretk = pwdkey;
+      const token = authenticator.generate(pwdkey);
+      console.log(token);
+
+      const newUser = new User({
+        email: req.body.username,
+        password: req.body.password,
+        key: pwdkey,
+      });
+      newUser.save(function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.render("genQR", { qrkey: pwdkey });
+        }
+      })};
+      if(err) {
+        console.log(err);
+      } 
+      if(foundUser) {
+        var registError="User already exists";
+        res.render("register", { error: registError });
+        console.log("User exits");
+      }
+    });
   });
-  newUser.save(function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("genQR", { qrkey: pwdkey });
-    }
-  });
-});
 
 var logininputemail = null;
 var logininputpwd = null;
